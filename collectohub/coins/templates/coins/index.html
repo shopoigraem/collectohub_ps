@@ -1,0 +1,52 @@
+{% extends 'coins/base.html' %}
+
+{% block title %}
+    Collecto Hub
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-2 mb-3">
+            {% for continent in continent_list %}
+                <div class="mb-2">
+                    <a href="{% url 'coins:continent-detail' continent.id %}" class="text text-decoration-none">{{ continent.name }}</a>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="col-md-10">
+            <div class="row">
+                {% for coin in page_obj %}
+                <div class="col-md-3 text-center mb-4">
+                    <a href="{% url 'coins:coin-detail' pk=coin.id %}" class="text-light text-decoration-none">
+                        <img src="{{ coin.img_front.url }}" alt="coin" class="img-fluid rounded shadow-sm hover-zoom">
+                    </a>
+                    <p class="mt-2">
+                        <span class="d-block">{{ coin.country }}</span>
+                        <span class="d-block">{{ coin.denomination }} {{ coin.year }}</span>
+                        <a href="{% url 'coins:user-cabinet' pk=coin.owner.id %}" class="d-block text">{{ coin.owner }}</a>
+                    </p>
+                </div>        
+                {% endfor %}
+            </div>
+            <div class="row justify-content-between my-3 fs-4">
+                <div class="col-md-3">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" class="btn btn-outline-light">&laquo; First</a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-light">Previous</a>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 text-center">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </div>
+                <div class="col-md-3 text-end">
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline">Next</a>  
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline">Last &raquo;</a>
+                    {% endif %}
+                </div>        
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+

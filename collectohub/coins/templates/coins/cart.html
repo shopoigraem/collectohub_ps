@@ -1,0 +1,75 @@
+{% comment %}
+{% block title %}Your Cart{% endblock %}
+{% block content %}
+
+<h1>Your Cart</h1>
+
+<section>
+    <h2>Summary of Your Coins</h2>
+    <p>
+        You have sent <strong>{{ total_coins_sent }}</strong> coins for trading.
+    </p>
+    <p>
+        You have successfully completed <strong>{{ total_trades }}</strong> trades.
+    </p>
+</section>
+
+<section>
+    <h2>Postage and Service Fees</h2>
+    <p>
+        <strong>Photography Fee:</strong> £0.15 per coin
+    </p>
+    <p>
+        <strong>Exchange Service Fee:</strong> £0.35 per trade
+    </p>
+    <p>
+        <strong>Total Photography Cost:</strong> £{{ total_coins_sent|multiply:0.15 }}
+    </p>
+    <p>
+        <strong>Total Exchange Service Cost:</strong> £{{ total_trades|multiply:0.35 }}
+    </p>
+    <p>
+        <strong>Postage Fee:</strong> £{{ user_profile.postage_fee }}
+    </p>
+</section>
+
+<section>
+    <h2>Additional Services</h2>
+    <form method="post" action="{% url 'coins:update_cart' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="coin_holders">Coin Holders (£0.50 each):</label>
+            <input type="number" class="form-control" id="coin_holders" name="coin_holders" value="{{ user_profile.coin_holders }}">
+        </div>
+        <div class="form-group">
+            <label for="holder_pages">Pages for Holders (£1.00 each):</label>
+            <input type="number" class="form-control" id="holder_pages" name="holder_pages" value="{{ user_profile.holder_pages }}">
+        </div>
+        <div class="form-group">
+            <label for="albums">Albums for Pages (£10.00 each):</label>
+            <input type="number" class="form-control" id="albums" name="albums" value="{{ user_profile.albums }}">
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Update Cart</button>
+    </form>
+</section>
+
+<section>
+    <h2>Total Cost</h2>
+    <ul>
+        <li>Coin Holders: £{{ user_profile.coin_holders|multiply:0.50 }}</li>
+        <li>Pages for Holders: £{{ user_profile.holder_pages|multiply:1.00 }}</li>
+        <li>Albums: £{{ user_profile.albums|multiply:10.00 }}</li>
+    </ul>
+    <p>
+        <strong>Grand Total:</strong> £{{ total_cost }}
+    </p>
+</section>
+
+<section>
+    <h2>Proceed to Checkout</h2>
+    <a href="{% url 'coins:checkout' %}" class="btn btn-success">Checkout</a>
+</section>
+
+{% endblock %}
+
+{% endcomment %}
