@@ -1,1 +1,9 @@
 .env
+Dockerfile
+db.sqlite3
+django2.pem
+docker-compose.yml
+Procfile
+runtime.txt
+
+
