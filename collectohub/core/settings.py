@@ -35,7 +35,7 @@ load_dotenv(env_path)
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -89,11 +89,19 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': dj_database_url.config(default='postgres://u1g70l53ocqu4t:pe41d38a0cd9b124ef4e42818931ac5bfc4107929f31b79bf51ca67aad13aa1dc@ccaml3dimis7eh.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com:5432/d19k1affub14eg')
+# }
 DATABASES = {
-    'default': dj_database_url.config(default='postgres://u1g70l53ocqu4t:pe41d38a0cd9b124ef4e42818931ac5bfc4107929f31b79bf51ca67aad13aa1dc@ccaml3dimis7eh.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com:5432/d19k1affub14eg')
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'backendcourse',
+        'USER': 'mysuperuser',
+        'PASSWORD': 'mysuperuser',
+        'HOST': 'backendcourse.cdmi2gsqsvus.eu-west-2.rds.amazonaws.com',
+        'PORT': '5432',
+    }
 }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
