@@ -10,12 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
-import dj_database_url
-import django_heroku
+
 
 from pathlib import Path
 
-from django.conf.global_settings import STATICFILES_DIRS
 from dotenv import load_dotenv
 
 
@@ -139,7 +137,7 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS: str = (os.path.join(BASE_DIR, 'static'),)
-django_heroku.settings(locals())
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
