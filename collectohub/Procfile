@@ -1,1 +1,1 @@
-web gunicorn collectohub/core.wsgi:application --log-file -
+web gunicorn collectohub.core.wsgi:application --log-file -
