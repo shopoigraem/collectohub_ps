@@ -1,1 +1,1 @@
-web: gunicorn collectohub.core.wsgi:application
+web: gunicorn core.wsgi
