@@ -5,11 +5,13 @@ from django.views.generic import TemplateView, DetailView, ListView
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from rest_framework import generics
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView, PasswordResetView, \
     PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 
 from .models import *
 from .forms import *
+from .sterializers import *
 
 
 class IndexView(ListView):
@@ -346,3 +348,15 @@ class MyPasswordResetConfirmView(PasswordResetConfirmView):
 
 class MyPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = "coins/password_reset_complete.html"
+
+class CoinListApiViewLatest(generics.ListAPIView):
+    queryset = Coin.objects.order_by("-id")[:5]
+    serializer_class = CoinsSerializer1
+
+class CoinDetailApiView(generics.RetrieveAPIView):
+    queryset = Coin.objects.all()
+    serializer_class = CoinsSerializer2
+
+class CoinUpdateApiView(generics.RetrieveUpdateAPIView):
+    queryset = Coin.objects.all()
+    serializer_class = CoinsSerializer1
