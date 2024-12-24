@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="91edb4e2-e638-40e6-81f9-e98a5d2567a8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/collectohub/coins/templates/coins/search.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/collectohub/coins/templates/coins/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/collectohub/coins/templates/coins/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/collectohub/coins/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/collectohub/coins/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/collectohub/coins/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/collectohub/coins/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/collectohub/core/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/collectohub/core/settings.py" afterDir="false" />
-    </list>
+    <list default="true" id="91edb4e2-e638-40e6-81f9-e98a5d2567a8" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
