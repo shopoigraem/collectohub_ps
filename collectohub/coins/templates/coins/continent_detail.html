@@ -20,11 +20,19 @@
                         <strong>{{ coin.denomination }} - {{ coin.year }}</strong><br>
                         Country: {{ coin.country.name }}<br>                
                         <a href="{% url 'coins:coin-detail' pk=coin.id %}">
-                            <img src="{{ coin.img_front.url }}" alt="Front Image" width="100">                          
+                            {% if coin.img_front %}
+                            <img src="{{ coin.img_front.url }}" alt="Front Image" width="100">
+                            {% else %}
+                            no image
+                            {% endif %}
                         </a>
                         <br>
                         <a href="{% url 'coins:coin-detail' pk=coin.id %}">
+                            {% if coin.img_add_1 %}
                             <img src="{{ coin.img_add_1.url }}" alt="Back Image" width="100">
+                            {% else %}
+                            no image
+                            {% endif %}
                         </a>
                         <br>
                         Status: {{ coin.get_status_display }}
