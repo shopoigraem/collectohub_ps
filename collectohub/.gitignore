@@ -5,5 +5,5 @@ django2.pem
 docker-compose.yml
 Procfile
 runtime.txt
-
+/__pycache__/
 

@@ -44,6 +44,7 @@ urlpatterns = [
     path('api/coin/recent/', views.CoinListApiViewLatest.as_view(), name='coin-latest-list-api'),
     path('api/coin/<int:pk>/', views.CoinDetailApiView.as_view(), name='coin-detail-api'),
     path('api/coin/update/<int:pk>/', views.CoinUpdateApiView.as_view(), name='coin-update-api'),
+    path('search/coins/', views.search_coin, name='search-coin'),
     # path('cart/', views.cart_view, name='cart'),
     # path('cart/update/', views.update_cart, name='update_cart'),
     # path('checkout/', views.checkout_view, name='checkout'),  # You'll need to implement the checkout_view

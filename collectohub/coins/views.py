@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -360,3 +361,20 @@ class CoinDetailApiView(generics.RetrieveAPIView):
 class CoinUpdateApiView(generics.RetrieveUpdateAPIView):
     queryset = Coin.objects.all()
     serializer_class = CoinsSerializer1
+
+def search_coin(request):
+    search_str = request.POST.get("search_field")
+    search_option = request.POST.get("search_option")
+    if search_str:
+        if search_option == "1":
+            coins = Coin.objects.filter(country__name__icontains=search_str)
+        elif search_option == '2':
+            coins = Coin.objects.filter(denomination__icontains=search_str)
+        elif search_option == "0":
+            coins = Coin.objects.filter(Q(country__name__icontains=search_str) | Q(denomination__icontains=search_str))
+
+
+        return render(request, template_name="coins/search.html", context={"coin_list": coins, "pattern": search_str})
+
+    else:
+        return HttpResponseRedirect(reverse('coins:index'))
