@@ -10,7 +10,11 @@
     {% for coin in country.coins.all %}
     <div class="col-3 text-center border ">
         <a href="{% url 'coins:coin-detail' pk=coin.id %}">
-            <img src="{{ coin.img_front.url }}" alt="coin" class="w-75 h-75 object-fit-contain border rounded">
+            {% if coin.img_front %}
+            <img src="{{ coin.img_front.url }}" alt="coin" class="w-75 h-75 object-fit-contain border rounded">                          
+            {% else %}
+            No image
+            {% endif %}
         </a>
         <p>
             {{ coin.country }} 
