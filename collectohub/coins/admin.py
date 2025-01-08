@@ -26,6 +26,9 @@ class CoinAdmin(admin.ModelAdmin):
     list_filter = [
         'box',
     ]
+    search_fields = [
+        'denomination',
+    ]
 
 @admin.register(Box)
 class BoxAdmin(admin.ModelAdmin):
@@ -34,3 +37,11 @@ class BoxAdmin(admin.ModelAdmin):
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
     list_display = ['author', 'recipient', 'is_read', 'created']
+
+@admin.register(Offer)
+class OfferAdmin(admin.ModelAdmin):
+    list_display = ['id']
+
+@admin.register(MultiOffer)
+class MultiOfferAdmin(admin.ModelAdmin):
+    list_display = ['id']
