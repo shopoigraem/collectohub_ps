@@ -1,0 +1,70 @@
+{% extends 'coins/base.html' %} 
+{% block title %} 
+{{ owner }}'s cabinet 
+{% endblock %} 
+{% block content %}
+<div class="row">
+    <div class="col-12 col-lg-4 col-xl-3">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white">
+            <div class="container-fluid">
+                <!-- Кнопка для мобільного меню -->
+                <button class="mb-3 navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <!-- Назва меню -->
+                <h6 class="d-lg-none">Menu</h6>
+
+                <!-- Блок з меню -->
+                <div class="collapse navbar-collapse" id="navbarMenu">
+                    <ol class="list-group w-100">
+                        <a href="{% url 'coins:user-cabinet' pk=owner.id %}">
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Profile</div>
+                                </div>
+                            </li>
+                        </a>
+                        <a href="{% url 'coins:user-cabinet-coins' pk=owner.id %}">
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">My coins</div>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">{{owner.coins.all.count}}</span>
+                            </li>
+                        </a>
+                        <a href="{% url 'coins:user-cabinet-my-offers' pk=owner.id %}">
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">My offers</div>
+                                </div>
+                                {% if owner.multi_offers_made %}
+                                <span class="badge bg-primary rounded-pill">{{owner.multi_offers_made.all.count}}</span>
+                                {% endif %}
+                            </li>
+                        </a>
+                        <a href="{% url 'coins:user-cabinet-offers-for-me' pk=owner.id %}">
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Offers for me</div>
+                                </div>
+                                {% if owner.multi_offers_look %}
+                                <span class="badge bg-primary rounded-pill">{{owner.multi_offers_look.all.count}}</span>
+                                {% endif %}
+                            </li>
+                        </a>
+                        {% if owner == user %}
+                        <a class="btn btn-default link-primary" href="{% url 'coins:password-change' %}">Password change</a>
+                        {% endif %}
+                    </ol>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <div class="col-12 col-lg-8 col-xl-9">
+        {% block user_page_content %}
+        {% endblock %}
+    </div>
+</div>
+
+
+{% endblock %}

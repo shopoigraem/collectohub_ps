@@ -1,0 +1,67 @@
+{% extends 'coins/user_cabinet/base_user_cabinet.html' %} 
+{% block user_page_content %}
+<div class="row">
+  {% for coin in owner.coins.all %}
+  <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+    <div class="card mb-3">
+        <a href="{% url 'coins:coin-detail' pk=coin.id %}">
+        {% if coin.img_front %}
+        <img
+            src="{{ coin.img_front.url }}"
+            alt="coin"
+            class="card-img-top"
+        />
+        {% else %}
+        no image
+        {% endif %}
+        </a>
+        <div class="card-body">
+            <h6 class="card-title">{{ coin.denomination }} {{ coin.year }}</h6>
+            <div class="d-flex justify-content-between">
+                <div>{{ coin.country }}</div>
+                <div>
+                    <span class="badge 
+                    {% if coin.get_status_display == 'active' %}bg-success
+                    {% elif coin.get_status_display == 'exchanged' %}bg-warning">
+                    {% elif coin.get_status_display == 'wait for delivery' %}bg-primary">
+                    {% elif coin.get_status_display == 'sent' %}bg-secondary
+                    {% endif %}">
+                    {{ coin.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% if owner == user %}
+<br>
+<h5>Exchanged coins</h5>
+  
+  
+  {% for coin in owner.profile.exchanged_coins %}
+  <div class="row">
+    <div class="col-3 p-5">
+      <img src="{{ coin.img_front.url }}" class="w-100">
+      <p>{{coin}}</p>
+    </div>
+    <div class="col-6 pt-5">
+      <form method="post" action="{% url 'coins:coin-change-status' %}">
+        {% csrf_token %}
+        <select name="status" id="">
+          <option value="">--Please choose status--</option>
+          <option value="a">Active</option>
+          <option value="w">Deliver to me</option>
+        </select>
+        <input type="submit" value="change status" class="btn btn-primary">
+        <input type="hidden" name="pk" value="{{coin.id}}">
+      </form>
+    </div>
+
+  </div>
+  {% endfor %}
+{% endif %}
+
+
+{% endblock %}

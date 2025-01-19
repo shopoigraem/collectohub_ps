@@ -72,7 +72,7 @@ def user_cabinet_view(request, pk):
         'multi_offers': multi_offers,
     }
 
-    return render(request, 'coins/user_cabinet.html', context)
+    return render(request, 'coins/user_cabinet/user_cabinet.html', context)
 
 
 class CoinMakeOfferView(DetailView):
@@ -191,7 +191,34 @@ def create_new_account(request):
 
 class UserCabinetView(DetailView):
     model = User
-    template_name = 'coins/user_cabinet.html'
+    template_name = 'coins/user_cabinet/user_cabinet.html'
+    context_object_name = 'owner'
+    extra_context = {
+        'form': MessageForm(),
+    }
+
+
+class UserCabinetMyOffersView(DetailView):
+    model = User
+    template_name = 'coins/user_cabinet/my_offers.html'
+    context_object_name = 'owner'
+    extra_context = {
+        'form': MessageForm(),
+    }
+
+
+class UserCabinetOffersForMeView(DetailView):
+    model = User
+    template_name = 'coins/user_cabinet/offers_for_me.html'
+    context_object_name = 'owner'
+    extra_context = {
+        'form': MessageForm(),
+    }
+
+
+class UserCabinetCoinsView(DetailView):
+    model = User
+    template_name = 'coins/user_cabinet/my_coins.html'
     context_object_name = 'owner'
     extra_context = {
         'form': MessageForm(),

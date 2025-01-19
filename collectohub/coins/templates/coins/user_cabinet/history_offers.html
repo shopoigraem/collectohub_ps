@@ -1,0 +1,22 @@
+<h4>History of offers ({{ owner.profile.history_of_offers_by_user|length }}):</h4>
+{% for coins in owner.profile.history_of_offers_by_user %}
+<p class="fs-4">Offer #{{ coins.id }} to {{ coins.responder }} ({{ coins.created }})</p>
+<p> coin(s) received from {{ coins.responder }}</p>
+<div class="row">
+  {% for coin in coins.coins_to_get.all %}
+  <div class="col-2 text-center">
+    <img src="{{ coin.img_front.url }}" class="w-75">
+    <p>{{ coin }}</p>
+  </div>
+  {% endfor %}
+</div>
+<p>received coins(s) as a result of exchange</p>
+<div class="row">
+  {% for coin in coins.coins_to_give.all %}
+  <div class="col-2 text-center">
+    <img src="{{ coin.img_front.url }}" class="w-75">
+    <p>{{ coin }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% endfor%}
