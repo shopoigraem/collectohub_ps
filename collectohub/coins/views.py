@@ -1,28 +1,32 @@
+from django.contrib.auth import logout, login, authenticate
+from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView, PasswordResetView, \
+    PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, DetailView, ListView
-from django.contrib.auth import logout, login, authenticate
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
 from rest_framework import generics
-from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView, PasswordResetView, \
-    PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 
-from .models import *
 from .forms import *
 from .sterializers import *
 
 
 class IndexView(ListView):
-    queryset = Coin.objects.filter(status='a').order_by('-views_counter')
+    model = Coin
     context_object_name = "coin_list"
     template_name = 'coins/index.html'
     extra_context = {
         "continent_list": Continent.objects.order_by("name"),
     }
     paginate_by = 12
+
+    def get_queryset(self):
+        queryset = Coin.objects.filter(status='a').order_by('-views_counter')
+        if self.request.user.is_authenticated:
+            queryset = queryset.exclude(owner=self.request.user)
+
+        return queryset
 
 
 class CoinDetailView(DetailView):
@@ -59,7 +63,7 @@ def offer_detail(request):
 
 def user_cabinet_view(request, pk):
     owner = get_object_or_404(User, id=pk)
-    user_offers = Offer.objects.filter(author=owner)
+    user_offers = Offer.objects.filter(Q(author=owner) | Q(responder=owner))
     multi_offers = MultiOffer.objects.filter(author=owner)
 
     context = {
@@ -285,12 +289,14 @@ def multi_offer_view(request, pk):
 
 
 def create_new_multi_offer(request):
-    coins_to_get_ids = request.POST.getlist('coins_to_get_ids')
+    coins_to_get_ids = request.POST.getlist('coin_to_get_id')
+
     coins_to_get = Coin.objects.filter(id__in=coins_to_get_ids)
-    coins_to_give_ids = request.POST.getlist('coins_to_give_ids')
+    coins_to_give_ids = request.POST.getlist('coin_to_give_id')
     coins_to_give = Coin.objects.filter(id__in=coins_to_give_ids)
-    responder_id = request.POST.get('recipient_id')
-    responder = User.objects.get(id=responder_id)
+    # responder_id = request.POST.get('recipient_id')
+
+    responder = User.objects.get(id=coins_to_get[0].owner.id)
     new_multi_offer = MultiOffer(
         author=request.user,
         responder=responder,
@@ -350,17 +356,21 @@ class MyPasswordResetConfirmView(PasswordResetConfirmView):
 class MyPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = "coins/password_reset_complete.html"
 
+
 class CoinListApiViewLatest(generics.ListAPIView):
     queryset = Coin.objects.order_by("-id")[:5]
     serializer_class = CoinsSerializer1
+
 
 class CoinDetailApiView(generics.RetrieveAPIView):
     queryset = Coin.objects.all()
     serializer_class = CoinsSerializer2
 
+
 class CoinUpdateApiView(generics.RetrieveUpdateAPIView):
     queryset = Coin.objects.all()
     serializer_class = CoinsSerializer1
+
 
 def search_coin(request):
     search_str = request.POST.get("search_field")
@@ -372,7 +382,6 @@ def search_coin(request):
             coins = Coin.objects.filter(denomination__icontains=search_str)
         elif search_option == "0":
             coins = Coin.objects.filter(Q(country__name__icontains=search_str) | Q(denomination__icontains=search_str))
-
 
         return render(request, template_name="coins/search.html", context={"coin_list": coins, "pattern": search_str})
 
