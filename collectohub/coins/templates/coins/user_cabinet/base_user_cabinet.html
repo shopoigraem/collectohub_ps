@@ -17,14 +17,14 @@
                 <!-- Блок з меню -->
                 <div class="collapse navbar-collapse" id="navbarMenu">
                     <ol class="list-group w-100">
-                        <a href="{% url 'coins:user-cabinet' pk=owner.id %}">
+                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet' pk=owner.id %}">
                             <li class="list-group-item d-flex justify-content-between align-items-start">
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">Profile</div>
                                 </div>
                             </li>
                         </a>
-                        <a href="{% url 'coins:user-cabinet-coins' pk=owner.id %}">
+                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet-coins' pk=owner.id %}">
                             <li class="list-group-item d-flex justify-content-between align-items-start">
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">My coins</div>
@@ -32,7 +32,7 @@
                                 <span class="badge bg-primary rounded-pill">{{owner.coins.all.count}}</span>
                             </li>
                         </a>
-                        <a href="{% url 'coins:user-cabinet-my-offers' pk=owner.id %}">
+                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet-my-offers' pk=owner.id %}">
                             <li class="list-group-item d-flex justify-content-between align-items-start">
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">My offers</div>
@@ -42,7 +42,7 @@
                                 {% endif %}
                             </li>
                         </a>
-                        <a href="{% url 'coins:user-cabinet-offers-for-me' pk=owner.id %}">
+                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet-offers-for-me' pk=owner.id %}">
                             <li class="list-group-item d-flex justify-content-between align-items-start">
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">Offers for me</div>
