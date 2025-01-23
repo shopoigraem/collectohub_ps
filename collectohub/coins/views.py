@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from django.views.generic import TemplateView, DetailView, ListView
+from django.views.generic import TemplateView, DetailView, ListView, View
 from rest_framework import generics
 
 from .forms import *
@@ -59,20 +59,6 @@ def signout(request):
 def offer_detail(request):
     coin_id = request.POST.get('coin_id')
     return HttpResponseRedirect(reverse('coins:coin-make-offer', kwargs={"pk": coin_id}))
-
-
-def user_cabinet_view(request, pk):
-    owner = get_object_or_404(User, id=pk)
-    user_offers = Offer.objects.filter(Q(author=owner) | Q(responder=owner))
-    multi_offers = MultiOffer.objects.filter(author=owner)
-
-    context = {
-        'owner': owner,
-        'user_offers': user_offers,
-        'multi_offers': multi_offers,
-    }
-
-    return render(request, 'coins/user_cabinet/user_cabinet.html', context)
 
 
 class CoinMakeOfferView(DetailView):
@@ -189,40 +175,44 @@ def create_new_account(request):
     return HttpResponseRedirect(reverse('coins:index'))
 
 
-class UserCabinetView(DetailView):
-    model = User
-    template_name = 'coins/user_cabinet/user_cabinet.html'
-    context_object_name = 'owner'
-    extra_context = {
-        'form': MessageForm(),
-    }
+class UserCabinetView(View):
+    @staticmethod
+    def get(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('index')
+        return render(request, 'coins/user_cabinet/user_cabinet.html')
 
 
-class UserCabinetMyOffersView(DetailView):
-    model = User
-    template_name = 'coins/user_cabinet/my_offers.html'
-    context_object_name = 'owner'
-    extra_context = {
-        'form': MessageForm(),
-    }
+class UserCabinetMyOffersView(View):
+    @staticmethod
+    def get(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('index')
+        return render(request, 'coins/user_cabinet/my_offers.html')
 
 
-class UserCabinetOffersForMeView(DetailView):
-    model = User
-    template_name = 'coins/user_cabinet/offers_for_me.html'
-    context_object_name = 'owner'
-    extra_context = {
-        'form': MessageForm(),
-    }
+class UserCabinetOffersForMeView(View):
+    @staticmethod
+    def get(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('index')
+        return render(request, 'coins/user_cabinet/offers_for_me.html')
 
 
-class UserCabinetCoinsView(DetailView):
-    model = User
-    template_name = 'coins/user_cabinet/my_coins.html'
-    context_object_name = 'owner'
-    extra_context = {
-        'form': MessageForm(),
-    }
+class UserCabinetCoinsView(View):
+    @staticmethod
+    def get(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('index')
+        return render(request, 'coins/user_cabinet/my_coins.html')
+
+
+class UserCabinetOffersHistoryView(View):
+    @staticmethod
+    def get(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('index')
+        return render(request, 'coins/user_cabinet/offers_history.html')
 
 
 def coin_change_status(request):

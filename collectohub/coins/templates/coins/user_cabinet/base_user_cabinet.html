@@ -1,6 +1,6 @@
 {% extends 'coins/base.html' %} 
 {% block title %} 
-{{ owner }}'s cabinet 
+{{ user }}'s cabinet 
 {% endblock %} 
 {% block content %}
 <div class="row">
@@ -17,44 +17,52 @@
                 <!-- Блок з меню -->
                 <div class="collapse navbar-collapse" id="navbarMenu">
                     <ol class="list-group w-100">
-                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet' pk=owner.id %}">
+                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet' %}">
                             <li class="list-group-item d-flex justify-content-between align-items-start">
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">Profile</div>
                                 </div>
                             </li>
                         </a>
-                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet-coins' pk=owner.id %}">
+                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet-coins' %}">
                             <li class="list-group-item d-flex justify-content-between align-items-start">
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">My coins</div>
                                 </div>
-                                <span class="badge bg-primary rounded-pill">{{owner.coins.all.count}}</span>
+                                <span class="badge bg-primary rounded-pill">{{user.coins.all.count}}</span>
                             </li>
                         </a>
-                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet-my-offers' pk=owner.id %}">
+                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet-my-offers' %}">
                             <li class="list-group-item d-flex justify-content-between align-items-start">
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">My offers</div>
                                 </div>
-                                {% if owner.multi_offers_made %}
-                                <span class="badge bg-primary rounded-pill">{{owner.multi_offers_made.all.count}}</span>
+                                {% if user.multi_offers_made %}
+                                <span class="badge bg-primary rounded-pill">{{user.multi_offers_made.all.count}}</span>
                                 {% endif %}
                             </li>
                         </a>
-                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet-offers-for-me' pk=owner.id %}">
+                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet-offers-for-me' %}">
                             <li class="list-group-item d-flex justify-content-between align-items-start">
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">Offers for me</div>
                                 </div>
-                                {% if owner.multi_offers_look %}
-                                <span class="badge bg-primary rounded-pill">{{owner.multi_offers_look.all.count}}</span>
+                                {% if user.multi_offers_look %}
+                                <span class="badge bg-primary rounded-pill">{{user.multi_offers_look.all.count}}</span>
                                 {% endif %}
                             </li>
                         </a>
-                        {% if owner == user %}
+                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet-offers-history' %}">
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Offers history</div>
+                                </div>
+                                {% if user.multi_offers_look %}
+                                <span class="badge bg-primary rounded-pill">0</span>
+                                {% endif %}
+                            </li>
+                        </a>
                         <a class="btn btn-default link-primary" href="{% url 'coins:password-change' %}">Password change</a>
-                        {% endif %}
                     </ol>
                 </div>
             </div>

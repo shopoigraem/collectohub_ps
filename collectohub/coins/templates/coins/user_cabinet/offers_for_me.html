@@ -1,10 +1,10 @@
 {% extends 'coins/user_cabinet/base_user_cabinet.html' %} 
 {% block user_page_content %}
-{% if owner.multi_offers_look %}
+{% if user.multi_offers_look %}
 
-<h4>My offers under consideration to another users ({{ owner.multi_offers_look.all|length }}):</h4>
+<h4>My offers under consideration to another users ({{ user.multi_offers_look.all|length }}):</h4>
 
-{% for multi_offer in owner.multi_offers_look.all %}
+{% for multi_offer in user.multi_offers_look.all %}
 
 <p class="fs-4">Offer #{{ multi_offer.id }} to {{ multi_offer.responder }} ({{ multi_offer.created|timesince }})</p>
 
