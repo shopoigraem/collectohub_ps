@@ -22,6 +22,7 @@ urlpatterns = [
     path('offer/<int:pk>/accept/', views.accept_multi_offer, name='accept-multi-offer'),
     path('create/account/page/', views.CreateUserView.as_view(), name='create-account-page'),
     path('create/account/new/', views.create_new_account, name='create-new-account'),
+    path('create/account/edit/', views.update_account, name='edit-account'),
     path('user/cabinet/', views.UserCabinetView.as_view(), name='user-cabinet'),
     path('user/cabinet/coins/', views.UserCabinetCoinsView.as_view(), name='user-cabinet-coins'),
     path('user/cabinet/my-offers/', views.UserCabinetMyOffersView.as_view(), name='user-cabinet-my-offers'),

@@ -8,6 +8,13 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, DetailView, ListView, View
 from rest_framework import generics
 
+
+import re
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.decorators import login_required
+
 from .forms import *
 from .sterializers import *
 
@@ -161,18 +168,172 @@ def create_new_account(request):
     postcode = request.POST.get('postcode')
     addres = request.POST.get('addres')
     city = request.POST.get('city')
+    
+    errors = {}
+    
+     # Валідація полів
+    if not username:
+        errors['username'] = 'Username is required.'
+    elif len(username) < 4:
+        errors['username'] = 'Username must be at least 4 characters long.'
+    elif len(username) > 30:
+        errors['username'] = 'Username cannot exceed 30 characters.'
+    elif not re.match(r'^[a-zA-Z0-9_]+$', username):
+        errors['username'] = 'Username can only contain letters, numbers, and underscores (_).'
+    elif User.objects.filter(username=username).exists():
+        errors['username'] = 'A user with this username already exists.'
 
-    if password1 == password2:
-        new_user = User.objects.create_user(username=username, password=password2)
-        new_user.first_name = first_name
-        new_user.last_name = last_name
-        new_user.email = email
-        new_user.save()
-        UserProfile.objects.create(user=new_user, phone=phone, postcode=postcode, addres=addres, city=city,
-                                   user_pic=request.FILES.get('user_picture'))
-        login(request, new_user)
+    # Password validation
+    if not password1:
+        errors['password1'] = 'Password is required.'
+    elif not password2:
+        errors['password2'] = 'Password is required.'
+    elif password1 != password2:
+        errors['password2'] = 'Passwords do not match.'
+    else:
+        try:
+            validate_password(password1)  # Validate password according to Django standards
+        except ValidationError as e:
+            errors['password1'] = ', '.join(e.messages)
+
+    # Email validation
+    if not email:
+        errors['email'] = 'Email is required.'
+    else:
+        try:
+            validate_email(email)  # Validate email format
+            if User.objects.filter(email=email).exists():
+                errors['email'] = 'A user with this email already exists.'
+        except ValidationError:
+            errors['email'] = 'Invalid email format.'
+
+    # Phone validation
+    if not phone:
+        errors['phone'] = 'Phone number is required.'
+    elif not re.match(r'^\+?\d{10,15}$', phone):  # Simple phone number format
+        errors['phone'] = 'Invalid phone number format. Use only digits.'
+
+    # Additional field validation
+    if not first_name:
+        errors['first_name'] = 'First name is required.'
+    if not last_name:
+        errors['last_name'] = 'Last name is required.'
+
+    # Перевірка інших полів за необхідності
+    
+    if errors:
+        # Передаємо помилки назад у шаблон
+        return render(request, 'coins/create_account.html', {'errors': errors, 'form_data': request.POST})
+
+    new_user = User.objects.create_user(username=username, password=password2)
+    new_user.first_name = first_name
+    new_user.last_name = last_name
+    new_user.email = email
+    new_user.save()
+    UserProfile.objects.create(user=new_user, phone=phone, postcode=postcode, addres=addres, city=city,
+                                user_pic=request.FILES.get('user_picture'))
+    login(request, new_user)
 
     return HttpResponseRedirect(reverse('coins:index'))
+
+
+@login_required
+def update_account(request):
+    user = request.user
+    user_profile = None
+    try:
+        user_profile = user.profile
+    except:
+        user_profile = UserProfile.objects.create(
+            user=user
+        )
+
+    if request.method == 'POST':
+        username = request.POST.get('username', user.username)
+        first_name = request.POST.get('first_name', user.first_name)
+        last_name = request.POST.get('last_name', user.last_name)
+        email = request.POST.get('email', user.email)
+        phone = request.POST.get('phone', user_profile.phone)
+        postcode = request.POST.get('postcode', user_profile.postcode)
+        addres = request.POST.get('addres', user_profile.addres)
+        city = request.POST.get('city', user_profile.city)
+        user_pic = request.FILES.get('user_pic', user_profile.user_pic)
+
+        errors = {}
+
+        # Username validation
+        if not username:
+            errors['username'] = 'Username is required.'
+        elif len(username) < 4:
+            errors['username'] = 'Username must be at least 4 characters long.'
+        elif len(username) > 30:
+            errors['username'] = 'Username cannot exceed 30 characters.'
+        elif not re.match(r'^[a-zA-Z0-9_]+$', username):
+            errors['username'] = 'Username can only contain letters, numbers, and underscores (_).'
+        elif username != user.username and User.objects.filter(username=username).exists():
+            errors['username'] = 'A user with this username already exists.'
+
+        # Email validation
+        if not email:
+            errors['email'] = 'Email is required.'
+        else:
+            try:
+                validate_email(email)
+                if email != user.email and User.objects.filter(email=email).exists():
+                    errors['email'] = 'A user with this email already exists.'
+            except ValidationError:
+                errors['email'] = 'Invalid email format.'
+
+        # Phone validation
+        if not phone:
+            errors['phone'] = 'Phone number is required.'
+        elif not re.match(r'^\+?\d{10,15}$', phone):
+            errors['phone'] = 'Invalid phone number format. Use only digits.'
+
+        # First name and Last name validation
+        if not first_name:
+            errors['first_name'] = 'First name is required.'
+        if not last_name:
+            errors['last_name'] = 'Last name is required.'
+
+        # If errors exist, return them to the template
+        if errors:
+            return render(request, 'coins/user_cabinet/user_cabinet.html', {'errors': errors, 'form_data': request.POST})
+
+        # Update user data
+        user.username = username
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+
+        user.save()
+
+        # Update UserProfile data
+        user_profile.phone = phone
+        user_profile.postcode = postcode
+        user_profile.addres = addres
+        user_profile.city = city
+        if user_pic:
+            user_profile.user_pic = user_pic
+
+        user_profile.save()
+
+        return render(request, 'coins/user_cabinet/user_cabinet.html', {'success': True})  # Redirect to a profile page after successful update
+
+    # If GET request, prefill the form with the user's current data
+    context = {
+        'form_data': {
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'phone': user_profile.phone,
+            'postcode': user_profile.postcode,
+            'addres': user_profile.addres,
+            'city': user_profile.city,
+        }
+    }
+    return render(request, 'coins/user_cabinet/user_cabinet.html', context)
 
 
 class UserCabinetView(View):

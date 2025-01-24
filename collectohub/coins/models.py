@@ -5,10 +5,10 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
     user_pic = models.ImageField(blank=True, upload_to='coins/user_pic/')
-    phone = models.CharField(max_length=20)
-    postcode = models.CharField(max_length=10)
-    addres = models.CharField(max_length=150)
-    city = models.CharField(max_length=20)
+    phone = models.CharField(max_length=20, blank=True)
+    postcode = models.CharField(max_length=10, blank=True)
+    addres = models.CharField(max_length=150, blank=True)
+    city = models.CharField(max_length=20, blank=True)
 
     # New Fields
     # coin_holders = models.PositiveIntegerField(default=0)
