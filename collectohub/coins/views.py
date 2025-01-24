@@ -9,11 +9,16 @@ from django.views.generic import TemplateView, DetailView, ListView, View
 from rest_framework import generics
 
 
+import os
 import re
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.decorators import login_required
+
+from django.core.paginator import EmptyPage
+from django.core.paginator import PageNotAnInteger
+from django.core.paginator import Paginator
 
 from .forms import *
 from .sterializers import *
@@ -236,7 +241,6 @@ def create_new_account(request):
 
     return HttpResponseRedirect(reverse('coins:index'))
 
-
 @login_required
 def update_account(request):
     user = request.user
@@ -258,6 +262,7 @@ def update_account(request):
         addres = request.POST.get('addres', user_profile.addres)
         city = request.POST.get('city', user_profile.city)
         user_pic = request.FILES.get('user_pic', user_profile.user_pic)
+        remove_pic = request.POST.get('remove_pic')
 
         errors = {}
 
@@ -313,9 +318,26 @@ def update_account(request):
         user_profile.postcode = postcode
         user_profile.addres = addres
         user_profile.city = city
+
+        # Remove profile picture if requested
+        if remove_pic and user_profile.user_pic:
+            old_user_pic_path = user_profile.user_pic.path
+            if os.path.isfile(old_user_pic_path):
+                os.remove(old_user_pic_path)
+            print('remove pic')
+            user_profile.user_pic.delete(save=False)  # Очищення поля user_pic
+            user_profile.user_pic = None
+
+        # Remove old profile picture if a new one is uploaded
+        if user_pic and user_profile.user_pic and user_profile.user_pic != user_pic:
+            old_user_pic_path = user_profile.user_pic.path
+            if os.path.isfile(old_user_pic_path):
+                os.remove(old_user_pic_path)
+
         if user_pic:
             user_profile.user_pic = user_pic
 
+        print('save profile')
         user_profile.save()
 
         return render(request, 'coins/user_cabinet/user_cabinet.html', {'success': True})  # Redirect to a profile page after successful update
@@ -365,7 +387,22 @@ class UserCabinetCoinsView(View):
     def get(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('index')
-        return render(request, 'coins/user_cabinet/my_coins.html')
+        
+        coins = Coin.objects.filter(owner=request.user)
+            
+        paginator = Paginator(coins, 12)
+        page = request.GET.get("page", 1)
+
+        try:
+            coins = paginator.page(page)
+        except PageNotAnInteger:
+            coins = paginator.page(1)
+        except EmptyPage:
+            coins = paginator.page(paginator.num_pages)
+            
+        context = { 'coins': coins }
+            
+        return render(request, 'coins/user_cabinet/my_coins.html', context)
 
 
 class UserCabinetOffersHistoryView(View):
@@ -389,9 +426,49 @@ def coin_change_status(request):
 class ContinentDetailView(DetailView):
     model = Continent
 
+    def get_context_data(self, **kwargs):
+        # Отримуємо стандартний контекст від DetailView
+        context = super().get_context_data(**kwargs)
+        
+        # Додаємо свій контекст
+        coins = self.object.get_active_coins()
+            
+        paginator = Paginator(coins, 12)
+        page = self.request.GET.get("page", 1)
+
+        try:
+            coins = paginator.page(page)
+        except PageNotAnInteger:
+            coins = paginator.page(1)
+        except EmptyPage:
+            coins = paginator.page(paginator.num_pages)
+        context['coins'] = coins
+        
+        return context
+
 
 class CountryDetailView(DetailView):
     model = Country
+
+    def get_context_data(self, **kwargs):
+        # Отримуємо стандартний контекст від DetailView
+        context = super().get_context_data(**kwargs)
+        
+        # Додаємо свій контекст
+        coins = self.object.coins.all()
+            
+        paginator = Paginator(coins, 12)
+        page = self.request.GET.get("page", 1)
+
+        try:
+            coins = paginator.page(page)
+        except PageNotAnInteger:
+            coins = paginator.page(1)
+        except EmptyPage:
+            coins = paginator.page(paginator.num_pages)
+        context['coins'] = coins
+        
+        return context
 
 
 class CoinsToSendListView(ListView):
