@@ -29,7 +29,7 @@ class IndexView(ListView):
     context_object_name = "coin_list"
     template_name = 'coins/index.html'
     extra_context = {
-        "continent_list": Continent.objects.order_by("name"),
+        "continent_list": Continent.objects.all().order_by("name"),
     }
     paginate_by = 12
 
@@ -39,6 +39,37 @@ class IndexView(ListView):
             queryset = queryset.exclude(owner=self.request.user)
 
         return queryset
+    
+    
+class AboutView(View):
+    @staticmethod
+    def get(request, *args, **kwargs):
+        return render(request, 'coins/about.html', {'success': True})
+    
+    
+class OwnerPublicView(DetailView):
+    model = User
+    template_name = 'coins/owner-public.html'
+    
+    def get_context_data(self, **kwargs):
+        
+        owner = User.objects.get(id=self.kwargs["pk"])
+        
+        coins = Coin.objects.filter(status='a', owner__id=owner.id)
+            
+        paginator = Paginator(coins, 12)
+        page = self.request.GET.get("page", 1)
+
+        try:
+            coins = paginator.page(page)
+        except PageNotAnInteger:
+            coins = paginator.page(1)
+        except EmptyPage:
+            coins = paginator.page(paginator.num_pages)
+            
+        context = { 'coins': coins, 'owner': owner }
+            
+        return context
 
 
 class CoinDetailView(DetailView):
@@ -111,26 +142,38 @@ def multi_offers_by_user(request):
 
 def accept_multi_offer(request, pk):
     multi_offer = MultiOffer.objects.get(id=pk)
-    coins_to_get = multi_offer.coins_to_get.all()
-    coins_to_give = multi_offer.coins_to_give.all()
-    for coin_to_get in coins_to_get:
-        coin_to_get.owner = multi_offer.author
-        coin_to_get.status = 'e'
-        coin_to_get.save()
-    for coin_to_give in coins_to_give:
-        coin_to_give.owner = multi_offer.responder
-        coin_to_give.status = 'e'
-        coin_to_give.save()
+    coins_to_get = multi_offer.coins_to_get.all().update(
+        owner = multi_offer.author,
+        status = 'e'
+    )
+    coins_to_give = multi_offer.coins_to_give.all().update(
+        owner = multi_offer.responder,
+        status = 'e'
+    )
     multi_offer.status = 'd'
     multi_offer.save()
-    return HttpResponseRedirect(reverse('coins:index'))
+    
+    # Отримуємо сторінку, з якої прийшов запит
+    referer_url = request.META.get('HTTP_REFERER')
+    
+    # Якщо немає `HTTP_REFERER`, перенаправляємо на сторінку за замовчуванням
+    redirect_url = referer_url if referer_url else reverse('coins:user-cabinet-coins')
+    
+    return HttpResponseRedirect(redirect_url)
 
 
 def cancel_multi_offer(request, pk):
     multi_offer = get_object_or_404(MultiOffer, pk=pk)
     if request.method == 'POST':
         multi_offer.delete()
-    return redirect('coins:user-cabinet', pk=request.user.id)
+    
+    # Отримуємо сторінку, з якої прийшов запит
+    referer_url = request.META.get('HTTP_REFERER')
+    
+    # Якщо немає `HTTP_REFERER`, перенаправляємо на сторінку за замовчуванням
+    redirect_url = referer_url if referer_url else reverse('coins:user-cabinet-coins')
+    
+    return HttpResponseRedirect(redirect_url)
 
 
 def cancel_offer(request, pk):
@@ -371,7 +414,8 @@ class UserCabinetMyOffersView(View):
     def get(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('index')
-        return render(request, 'coins/user_cabinet/my_offers.html')
+        context = { 'offers': request.user.profile.multi_offers_to_other_users_under_consideration() }
+        return render(request, 'coins/user_cabinet/my_offers.html', context)
 
 
 class UserCabinetOffersForMeView(View):
@@ -379,7 +423,8 @@ class UserCabinetOffersForMeView(View):
     def get(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('index')
-        return render(request, 'coins/user_cabinet/offers_for_me.html')
+        context = { 'offers': request.user.profile.multi_offers_under_consideration() }
+        return render(request, 'coins/user_cabinet/offers_for_me.html', context)
 
 
 class UserCabinetCoinsView(View):
@@ -388,7 +433,7 @@ class UserCabinetCoinsView(View):
         if not request.user.is_authenticated:
             return redirect('index')
         
-        coins = Coin.objects.filter(owner=request.user)
+        coins = Coin.objects.filter(owner=request.user, status='a')
             
         paginator = Paginator(coins, 12)
         page = request.GET.get("page", 1)
@@ -405,6 +450,75 @@ class UserCabinetCoinsView(View):
         return render(request, 'coins/user_cabinet/my_coins.html', context)
 
 
+class UserCabinetExchangedCoinsView(View):
+    @staticmethod
+    def get(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('index')
+        
+        coins = request.user.profile.exchanged_coins()
+            
+        paginator = Paginator(coins, 12)
+        page = request.GET.get("page", 1)
+
+        try:
+            coins = paginator.page(page)
+        except PageNotAnInteger:
+            coins = paginator.page(1)
+        except EmptyPage:
+            coins = paginator.page(paginator.num_pages)
+            
+        context = { 'coins': coins }
+            
+        return render(request, 'coins/user_cabinet/exchanged_coins.html', context)
+
+
+class UserCabinetWaitForDeliveryView(View):
+    @staticmethod
+    def get(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('index')
+        
+        coins = request.user.profile.coins_wait_for_delivery()
+            
+        paginator = Paginator(coins, 12)
+        page = request.GET.get("page", 1)
+
+        try:
+            coins = paginator.page(page)
+        except PageNotAnInteger:
+            coins = paginator.page(1)
+        except EmptyPage:
+            coins = paginator.page(paginator.num_pages)
+            
+        context = { 'coins': coins }
+            
+        return render(request, 'coins/user_cabinet/wait_for_delivery.html', context)
+
+
+class UserCabinetSentView(View):
+    @staticmethod
+    def get(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('index')
+        
+        coins = request.user.profile.coins_sent()
+            
+        paginator = Paginator(coins, 12)
+        page = request.GET.get("page", 1)
+
+        try:
+            coins = paginator.page(page)
+        except PageNotAnInteger:
+            coins = paginator.page(1)
+        except EmptyPage:
+            coins = paginator.page(paginator.num_pages)
+            
+        context = { 'coins': coins }
+            
+        return render(request, 'coins/user_cabinet/coins_sent.html', context)
+
+
 class UserCabinetOffersHistoryView(View):
     @staticmethod
     def get(request, *args, **kwargs):
@@ -414,13 +528,21 @@ class UserCabinetOffersHistoryView(View):
 
 
 def coin_change_status(request):
-    pk = request.POST.get('pk')
+    coins = request.POST.getlist('coins', None)
     status = request.POST.get('status')
-    coin = Coin.objects.get(id=pk)
-    if status == 'a' or status == 'w':
-        coin.status = status
-        coin.save()
-    return HttpResponseRedirect(reverse('coins:user-cabinet', kwargs={"pk": coin.owner.id}))
+    
+    if coins:
+        coins = Coin.objects.filter(id__in=coins)
+        if status == 'a' or status == 'w':
+            coins.update(status=status)
+    
+    # Отримуємо сторінку, з якої прийшов запит
+    referer_url = request.META.get('HTTP_REFERER')
+    
+    # Якщо немає `HTTP_REFERER`, перенаправляємо на сторінку за замовчуванням
+    redirect_url = referer_url if referer_url else reverse('coins:user-cabinet-coins')
+    
+    return HttpResponseRedirect(redirect_url)
 
 
 class ContinentDetailView(DetailView):
@@ -471,24 +593,67 @@ class CountryDetailView(DetailView):
         return context
 
 
-class CoinsToSendListView(ListView):
-    model = Coin
-    queryset = Coin.objects.filter(status='w')
-    template_name = 'coins/coins_to_send.html'
+class CoinsToSendListView(View):
+    @staticmethod
+    def get(request, *args, **kwargs):
+        if not request.user.is_superuser:
+            return redirect("coins: index")
+        
+        users = User.objects.filter(coins__status='w').distinct()
+            
+        paginator = Paginator(users, 12)
+        page = request.GET.get("page", 1)
+
+        try:
+            users = paginator.page(page)
+        except PageNotAnInteger:
+            users = paginator.page(1)
+        except EmptyPage:
+            users = paginator.page(paginator.num_pages)
+            
+        context = { 'users': users }
+            
+        return render(request, 'coins/coins_to_send.html', context)
+
+
+class CoinsToSendUserListView(DetailView):
+    model = User
+    template_name = 'coins/coins_to_send_user.html'
+    
+    def get_context_data(self, **kwargs):
+        if not self.request.user.is_superuser:
+            return redirect("coins: index")
+        
+        owner = User.objects.get(id=self.kwargs["pk"])
+        
+        coins = Coin.objects.filter(status='w', owner__id=owner.id)
+            
+        paginator = Paginator(coins, 12)
+        page = self.request.GET.get("page", 1)
+
+        try:
+            coins = paginator.page(page)
+        except PageNotAnInteger:
+            coins = paginator.page(1)
+        except EmptyPage:
+            coins = paginator.page(paginator.num_pages)
+            
+        context = { 'coins': coins, 'owner': owner }
+            
+        return context
 
 
 def coin_sended(request):
-    pk = request.POST.get('pk')
-    coin = Coin.objects.get(id=pk)
-    coin.status = 's'
-    coin.save()
+    coins = request.POST.getlist('coins')
+    coins = Coin.objects.filter(id__in=coins)
+    coins.update(status='s')
     new_message = Message(
-        text=f'Coin(s) have been sent to you: {coin}\nthis message was generated automatically',
+        text=f'Coin(s) have been sent to you: {coins.count} coins\nthis message was generated automatically',
         author=User.objects.get(id=1),
-        recipient=coin.owner
+        recipient=coins[0].owner
     )
     new_message.save()
-    return HttpResponseRedirect(reverse('coins:coins-to-send'))
+    return HttpResponseRedirect(reverse('coins:coins-to-send-user', kwargs={"pk": coins[0].owner.id}))
 
 
 class MailBox(DetailView):

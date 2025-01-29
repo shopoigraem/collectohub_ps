@@ -6,50 +6,80 @@
 
 {% block content %}
 
-{% for offer in object_list %}
+{% for multi_offer in object_list %}
 
-    
-<h3> Offer #{{ offer.id }} from {{ offer.author }}</h3>
-<p> {{ offer.created }}</p> 
-<div class="row">
-    <div class="col-4">
-        <h4> Your coins that {{ offer.author }} is interested in exchanging</h4>
-        {% for coin in offer.coins_to_get.all %}
-        <div>
-            <img src="{{ coin.img_front.url }}" alt="" height="150">
-        <p>
-            {{ coin }}
-        </p>
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex flex-wrap gap-3">
+            <p class="fs-4">Offer #{{ multi_offer.id }} to {{ multi_offer.responder }} ({{ multi_offer.created|timesince }})</p>
+                
+            <div class="d-flex gap-3">
+                <form action="{% url 'coins:accept-multi-offer' pk=multi_offer.id %}" method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="accept offer" class="btn btn-success">
+                    
+                </form>
+
+                <form action="{% url 'coins:cancel-multi-offer' pk=multi_offer.id %}" method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="cancel offer" class="btn btn-danger">
+                </form>
+            </div>    
         </div>
-        
-        {% endfor %}
-    </div> 
-    <div class="col-1"></div>
-    <div class="col-4">
-        <h4> Сoins that are offered to you </h4>
-        {% for coin in offer.coins_to_give.all %}
-        <div>
-            <img src="{{ coin.img_front.url }}" alt="" height="150">
-        <p>
-            {{ coin }}
-        </p>
-        </div>                
-        {% endfor %}
-    </div>    
-    <div class="col-3">
-        <form action="{% url 'coins:accept-multi-offer' pk=offer.id %}" method="post">
-            {% csrf_token %}
-            <input type="submit" value="accept offer" class="btn btn-success">
-            
-        </form>
 
-        <div class="my-3"></div>
+        <p>{{ multi_offer.responder }}'s coins:</p>
 
-        <form action="{% url 'coins:cancel-multi-offer' pk=offer.id %}" method="post">
-            {% csrf_token %}
-            <input type="submit" value="cancel offer" class="btn btn-danger">
-        </form>
-    </div>       
+        <div class="row">
+        {% for coin in multi_offer.coins_to_get.all %}
+        <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+            <div class="card mb-3">
+                <a href="{% url 'coins:coin-detail' pk=coin.id %}">
+                {% if coin.img_front %}
+                <img
+                    src="{{ coin.img_front.url }}"
+                    alt="coin"
+                    class="card-img-top"
+                />
+                {% else %}
+                no image
+                {% endif %}
+                </a>
+                <div class="card-body p-2">
+                    <h6 class="card-title">{{ coin.denomination }} {{ coin.year }}</h6>
+                    <div>{{ coin.country }}</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        </div>
+
+        <hr>
+
+        <p>your coins:</p>
+        <div class="row">
+        {% for coin in multi_offer.coins_to_give.all %}
+        <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+            <div class="card mb-3">
+                <a href="{% url 'coins:coin-detail' pk=coin.id %}">
+                {% if coin.img_front %}
+                <img
+                    src="{{ coin.img_front.url }}"
+                    alt="coin"
+                    class="card-img-top"
+                />
+                {% else %}
+                no image
+                {% endif %}
+                </a>
+                <div class="card-body p-2">
+                    <h6 class="card-title">{{ coin.denomination }} {{ coin.year }}</h6>
+                    <div>{{ coin.country }}</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        </div>
+    </div>
 </div>
 
 

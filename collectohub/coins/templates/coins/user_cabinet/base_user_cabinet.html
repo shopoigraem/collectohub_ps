@@ -29,7 +29,31 @@
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">My coins</div>
                                 </div>
-                                <span class="badge bg-primary rounded-pill">{{user.coins.all.count}}</span>
+                                <span class="badge bg-primary rounded-pill">{{user.profile.active_coins.count}}</span>
+                            </li>
+                        </a>
+                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet-exchanged-coins' %}">
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Exchanged coins</div>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">{{user.profile.exchanged_coins.count}}</span>
+                            </li>
+                        </a>
+                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet-wait-for-delivery' %}">
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Wait  for delivery</div>
+                                </div>
+                                <span class="badge bg-secondary rounded-pill">{{user.profile.coins_wait_for_delivery.count}}</span>
+                            </li>
+                        </a>
+                        <a class="text-decoration-none" href="{% url 'coins:user-cabinet-sent' %}">
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Coin sent</div>
+                                </div>
+                                <span class="badge bg-secondary rounded-pill">{{user.profile.coins_sent.count}}</span>
                             </li>
                         </a>
                         <a class="text-decoration-none" href="{% url 'coins:user-cabinet-my-offers' %}">
@@ -38,7 +62,7 @@
                                     <div class="fw-bold">My offers</div>
                                 </div>
                                 {% if user.multi_offers_made %}
-                                <span class="badge bg-primary rounded-pill">{{user.multi_offers_made.all.count}}</span>
+                                <span class="badge bg-primary rounded-pill">{{user.profile.multi_offers_to_other_users_under_consideration.count}}</span>
                                 {% endif %}
                             </li>
                         </a>
@@ -48,7 +72,7 @@
                                     <div class="fw-bold">Offers for me</div>
                                 </div>
                                 {% if user.multi_offers_look %}
-                                <span class="badge bg-primary rounded-pill">{{user.multi_offers_look.all.count}}</span>
+                                <span class="badge bg-primary rounded-pill">{{user.profile.multi_offers_under_consideration.count}}</span>
                                 {% endif %}
                             </li>
                         </a>

@@ -24,6 +24,10 @@ class UserProfile(models.Model):
         offers = MultiOffer.objects.filter(responder=self.user, status='c')
         return offers.exists()
 
+    def multi_offers_under_consideration(self):
+        offers = MultiOffer.objects.filter(responder=self.user, status='c')
+        return offers
+
     def multi_offers_to_other_users_under_consideration(self):
         offers = MultiOffer.objects.filter(author=self.user, status='c')
         return offers
@@ -37,6 +41,12 @@ class UserProfile(models.Model):
 
     def exchanged_coins(self):
         return self.user.coins.filter(status='e')
+
+    def coins_wait_for_delivery(self):
+        return self.user.coins.filter(status='w')
+
+    def coins_sent(self):
+        return self.user.coins.filter(status='s')
 
     def unread_messages_count(self):
         return self.user.received_messages.filter(is_read=False).count()
