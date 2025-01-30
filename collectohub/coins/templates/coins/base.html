@@ -82,12 +82,12 @@
                     </li>
                     {% if user.profile.has_multi_offers_under_consideration %}
                     <li class="nav-item">
-                        <a class="nav-link text-warning" href="{% url 'coins:user-offers' %}">Offers to Consider</a>
+                        <a class="nav-link text-primary" href="{% url 'coins:user-offers' %}">Offers to Consider {% if user.profile.multi_offers_under_consideration %}<span class="badge bg-danger rounded-pill">{{user.profile.multi_offers_under_consideration.count}}</span>{% endif %}</a>
                     </li>
                     {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'coins:user-mail-box' pk=user.id %}">
-                            Mailbox {% if user.profile.unread_messages_count %}: ({{ user.profile.unread_messages_count }}){% endif %}
+                            Mailbox {% if user.profile.unread_messages_count %}<span class="badge bg-danger rounded-pill">{{user.profile.unread_messages_count}}</span>{% endif %}
                         </a>
                     </li>
                     {% if user.is_staff %}
@@ -105,14 +105,7 @@
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <button
-                            type="button"
-                            class="btn btn-primary"
-                            data-bs-toggle="modal"
-                            data-bs-target="#modal-login"
-                        >
-                            Sign in
-                        </button>
+                        <a class="btn btn-primary" href="{% url 'coins:sign-in' %}">Sign in</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'coins:create-account-page' %}">Create Account</a>

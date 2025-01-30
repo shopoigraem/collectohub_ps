@@ -86,12 +86,22 @@ class CoinDetailView(DetailView):
 
 
 def signin(request):
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-    user = authenticate(request=request, username=username, password=password)
-    if user is not None:
-        login(request, user)
-    return HttpResponseRedirect(reverse('coins:index'))
+    context = { 'errors': None }
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request=request, username=username, password=password)
+        context = { 'errors': None }
+        if user is not None:
+            login(request, user)
+            return HttpResponseRedirect(reverse('coins:index'))
+        else:
+            context['errors'] = 'User found, check username or password'
+    return render(
+        request,
+        'coins/sing_in.html',
+        context
+    )
 
 
 def signout(request):
@@ -134,9 +144,20 @@ def offers_by_user(request):
 
 
 def multi_offers_by_user(request):
-    context = {
-        'object_list': MultiOffer.objects.filter(responder=request.user, status='c')
-    }
+        
+    offers = MultiOffer.objects.filter(responder=request.user, status='c')
+        
+    paginator = Paginator(offers, 12)
+    page = request.GET.get("page", 1)
+
+    try:
+        offers = paginator.page(page)
+    except PageNotAnInteger:
+        offers = paginator.page(1)
+    except EmptyPage:
+        offers = paginator.page(paginator.num_pages)
+        
+    context = { 'offers': offers }
     return render(request=request, template_name="coins/ofers_by_user.html", context=context)
 
 
@@ -414,7 +435,20 @@ class UserCabinetMyOffersView(View):
     def get(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('index')
-        context = { 'offers': request.user.profile.multi_offers_to_other_users_under_consideration() }
+        
+        offers = request.user.profile.multi_offers_to_other_users_under_consideration()
+            
+        paginator = Paginator(offers, 12)
+        page = request.GET.get("page", 1)
+
+        try:
+            offers = paginator.page(page)
+        except PageNotAnInteger:
+            offers = paginator.page(1)
+        except EmptyPage:
+            offers = paginator.page(paginator.num_pages)
+            
+        context = { 'offers': offers }
         return render(request, 'coins/user_cabinet/my_offers.html', context)
 
 
@@ -423,7 +457,20 @@ class UserCabinetOffersForMeView(View):
     def get(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('index')
-        context = { 'offers': request.user.profile.multi_offers_under_consideration() }
+        
+        offers = request.user.profile.multi_offers_under_consideration()
+            
+        paginator = Paginator(offers, 12)
+        page = request.GET.get("page", 1)
+
+        try:
+            offers = paginator.page(page)
+        except PageNotAnInteger:
+            offers = paginator.page(1)
+        except EmptyPage:
+            offers = paginator.page(paginator.num_pages)
+            
+        context = { 'offers': offers }
         return render(request, 'coins/user_cabinet/offers_for_me.html', context)
 
 
@@ -524,7 +571,21 @@ class UserCabinetOffersHistoryView(View):
     def get(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('index')
-        return render(request, 'coins/user_cabinet/offers_history.html')
+        
+        offers = request.user.profile.history_of_offers_by_user()
+            
+        paginator = Paginator(offers, 12)
+        page = request.GET.get("page", 1)
+
+        try:
+            offers = paginator.page(page)
+        except PageNotAnInteger:
+            offers = paginator.page(1)
+        except EmptyPage:
+            offers = paginator.page(paginator.num_pages)
+            
+        context = { 'offers': offers }
+        return render(request, 'coins/user_cabinet/offers_history.html', context)
 
 
 def coin_change_status(request):
@@ -710,9 +771,10 @@ def multi_offer_view(request, pk):
 
 def create_new_multi_offer(request):
     coins_to_get_ids = request.POST.getlist('coin_to_get_id')
+    coins_to_give_ids = request.POST.getlist('coin_to_give_id')
+    message = request.POST.get('message')
 
     coins_to_get = Coin.objects.filter(id__in=coins_to_get_ids)
-    coins_to_give_ids = request.POST.getlist('coin_to_give_id')
     coins_to_give = Coin.objects.filter(id__in=coins_to_give_ids)
     # responder_id = request.POST.get('recipient_id')
 
@@ -720,6 +782,7 @@ def create_new_multi_offer(request):
     new_multi_offer = MultiOffer(
         author=request.user,
         responder=responder,
+        message=message or ''
     )
     new_multi_offer.save()
     new_multi_offer.coins_to_get.add(*coins_to_get)

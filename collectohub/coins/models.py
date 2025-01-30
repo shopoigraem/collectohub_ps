@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 
 class UserProfile(models.Model):
@@ -33,7 +34,7 @@ class UserProfile(models.Model):
         return offers
 
     def history_of_offers_by_user(self):
-        history = MultiOffer.objects.filter(author=self.user, status='d')
+        history = MultiOffer.objects.filter((Q(author=self.user) | Q(responder=self.user)) & Q(status='d'))
         return history
 
     def active_coins(self):
@@ -173,6 +174,7 @@ class Offer(models.Model):
 class MultiOffer(models.Model):
     coins_to_get = models.ManyToManyField(Coin, related_name='offers_get')
     coins_to_give = models.ManyToManyField(Coin, related_name='offers_give')
+    message = models.TextField(blank=True, help_text='Message')
     author = models.ForeignKey(User, related_name='multi_offers_made', on_delete=models.CASCADE)
     responder = models.ForeignKey(User, related_name='multi_offers_look', on_delete=models.CASCADE)
     status = models.CharField(max_length=1, choices=status_choices, default='c')

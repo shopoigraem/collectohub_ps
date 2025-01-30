@@ -81,8 +81,8 @@
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">Offers history</div>
                                 </div>
-                                {% if user.multi_offers_look %}
-                                <span class="badge bg-primary rounded-pill">0</span>
+                                {% if user.profile.history_of_offers_by_user %}
+                                <span class="badge bg-primary rounded-pill">{{ user.profile.history_of_offers_by_user.count }}</span>
                                 {% endif %}
                             </li>
                         </a>
