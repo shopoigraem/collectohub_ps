@@ -14,9 +14,11 @@
                 
             <div class="d-flex gap-3">
                 <!-- Кнопка для прийняття оферу -->
+                {% if multi_offer.valid_offer %}
                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#acceptModal{{ multi_offer.id }}">
                     Accept offer
                 </button>
+                {% endif %}
 
                 <!-- Кнопка для скасування оферу -->
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelModal{{ multi_offer.id }}">
@@ -24,8 +26,14 @@
                 </button>
             </div>    
         </div>
+        {% if not multi_offer.valid_offer %}
+        <div class="alert alert-danger my-3">
+            The offer is not valid, the coins have already been exchanged
+        </div>
+        {% endif %}
 
         <!-- Модальне вікно для підтвердження прийняття оферу -->
+        {% if multi_offer.valid_offer %}
         <div class="modal fade" id="acceptModal{{ multi_offer.id }}" tabindex="-1" aria-labelledby="acceptModalLabel{{ multi_offer.id }}" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -46,6 +54,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
         <!-- Модальне вікно для підтвердження скасування оферу -->
         <div class="modal fade" id="cancelModal{{ multi_offer.id }}" tabindex="-1" aria-labelledby="cancelModalLabel{{ multi_offer.id }}" aria-hidden="true">

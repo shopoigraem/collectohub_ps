@@ -180,6 +180,13 @@ class MultiOffer(models.Model):
     status = models.CharField(max_length=1, choices=status_choices, default='c')
     created = models.DateTimeField(auto_now_add=True)
 
+    def valid_offer(self):
+        if self.coins_to_get.all().exclude(owner=self.responder).exists():
+            return False
+        if self.coins_to_give.all().exclude(owner=self.author).exists():
+            return False
+        return True
+
 
 class Message(models.Model):
     text = models.TextField()
