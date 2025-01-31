@@ -83,7 +83,7 @@ class Continent(models.Model):
         return Coin.objects.filter(country__continent=self, status="a")
 
     def get_coutries_has_coins(self):
-        return self.countries.filter(coins__isnull=False).distinct()
+        return self.countries.filter(coins__isnull=False).distinct().order_by('name')
 
     def __str__(self):
         return self.name
@@ -122,7 +122,7 @@ material_choices = [
     ("titanium", "ti")
 ]
 
-status_choices_coin = [('a', 'active'), ('e', 'exchanged'), ('w', 'wait for delivery'), ('s', 'sent')]
+status_choices_coin = [('a', 'active'), ('n', 'not active'), ('e', 'exchanged'), ('w', 'wait for delivery'), ('s', 'sent')]
 
 
 class Coin(models.Model):
